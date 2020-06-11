@@ -90,5 +90,5 @@ function handleBrightcovePlayers(numTries) {
   }
  
 }
-console.log("**Start window.parent pm- brightcove test**")
+console.log("**Start window.parent pm- brightcove-test**")
 handleBrightcovePlayers(1);
