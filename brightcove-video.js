@@ -9,8 +9,7 @@
  * But the script is run in the context of the parent window. So CustomEvents
  * can be dispatched and they can be received in the main window.
  *
- *
- * @doc Brightcove Player development overview https://player.support.brightcove.com/coding-topics/overview-player-api.html
+ *@doc Brightcove Player development overview https://player.support.brightcove.com/coding-topics/overview-player-api.html
  * @doc Brightcove Player API https://docs.brightcove.com/brightcove-player/current-release/Player.html
  * @doc HTML5 media events https://html.spec.whatwg.org/#mediaevents
  */
@@ -36,27 +35,10 @@ function handlePlaybackEvent_(event) {
     detail: eventDetail,
   };
 console.log("Player Start")
-  if (window.frameElement) {
-    // The player is in a Brightcove experience --> use CustomEvent
-    var customEvent = new CustomEvent(state, eventInit);
-    window.frameElement.dispatchEvent(customEvent);
-  } else {
-    // The player is embedded in the web page directly --> use postMessage
-    var message = {
-      state: state,
-      eventInit: eventInit,
-    };
-
-    // IMPORTANT!
-    // Replace '*' with the actual origin that should receive the message.
-    // E.g. 'https://www.mysite.com:80'.
-    var targetOrigin = 'https://ion.fiserv.com';
-
-    // Brightcove only allows string messages to be posted,
-    // so stringify the message object.
-    window.postMessage(JSON.stringify(message), targetOrigin);
-    // Handle the message in the parent window appropriately.
-  }
+  var customEvent = new CustomEvent(state, eventInit);
+  //console.log(eventDetail)
+  //window.parent.dispatchEvent(customEvent);
+  window.parent.postMessage(eventDetail,"*");
 }
 
 /**
@@ -96,5 +78,5 @@ function handleBrightcovePlayers(numTries) {
     }
   }
 }
-console.log("**Start window.parent pm- brightcove test1**")
+console.log("**Start window.parent pm- no print**")
 handleBrightcovePlayers(1);
