@@ -1,26 +1,3 @@
-/**
- * @fileoverview Detects video playback events in the Brightcove player and
- * sends a CustomEvent for each of them.
- *
- * Although the player is loaded in an IFRAME, Brightcover overwrites
- * `postMessage` with their own function, so you can't post messages between
- * the parent and frame windows.
- *
- * But the script is run in the context of the parent window. So CustomEvents
- * can be dispatched and they can be received in the main window.
- *
- *@doc Brightcove Player development overview https://player.support.brightcove.com/coding-topics/overview-player-api.html
- * @doc Brightcove Player API https://docs.brightcove.com/brightcove-player/current-release/Player.html
- * @doc HTML5 media events https://html.spec.whatwg.org/#mediaevents
- */
-
-/**
- * @private
- * Given a playback event, get other metadata related to the event,
- * then send the event's details to the parent.
- * @param {Event} event The playback event.
- * @this The Brightcove player object.
- */
 function handlePlaybackEvent_(event) {
   var state = event.type;
   var player = this;
@@ -38,14 +15,47 @@ console.log("Player Start")
   var customEvent = new CustomEvent(state, eventInit);
   //console.log(eventDetail)
   //window.parent.dispatchEvent(customEvent);
-  window.parent.postMessage(eventDetail,"*");
+  window.parent.postMessage(eventDetail,"https://www.ion.fiserv.com");
 }
 
+/**
+ * Send milestone events.
+ */
+
+var fcurrentTime = player.currentTime();
+var fduration = player.duration();
+var percentNum = Math.floor((fcurrentTime/fduration)*100);
+console.log(fcurrentTime,' / ', fduration, ' - ',percentNum);
+
+if (percNum>0 && percNum <25)
+    {
+      percNumGroup = 1
+    }
+    else if (percNum>=25 && percNum <50)
+    {
+      percNumGroup = 25
+    }
+    else if (percNum>=50 && percNum <75)
+    {
+      percNumGroup = 50
+    }
+    else if (percNum>75 && percNum <=95)
+    {
+      percNumGroup = 75
+    }
+    else if (percNum>95 && percNum <=100)
+    {
+      percNumGroup = 99
+    }
+    return (percNumGroup);
+  } 
 /**
  * @public
  * Send CustomEvents to the parent for specific media playback events.
  * @param {int} numTries Counter of tries to check that players are valid.
  */
+
+ 
 function handleBrightcovePlayers(numTries) {
   var players = videojs.getPlayers();
   var playerIds = Object.keys(players);
@@ -62,12 +72,13 @@ function handleBrightcovePlayers(numTries) {
   } else {
     var playerId = playerIds[0];
     try {
-      videojs.getPlayer(playerId).ready(function() {
+        videojs.getPlayer(playerId).ready(function() {
         var player = this;
         var playerEvents = [
           'ended',
           'pause',
           'play',
+		  percNumGroup
         ];
         playerEvents.forEach(function(playerEvent) {
           player.on(playerEvent, handlePlaybackEvent_);
@@ -77,6 +88,7 @@ function handleBrightcovePlayers(numTries) {
       console.warn(e);
     }
   }
+ 
 }
-console.log("**Start window.parent pm- no print**")
+console.log("**Start window.parent pm- brightcove test**")
 handleBrightcovePlayers(1);
