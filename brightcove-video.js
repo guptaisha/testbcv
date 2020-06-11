@@ -9,7 +9,8 @@
  * But the script is run in the context of the parent window. So CustomEvents
  * can be dispatched and they can be received in the main window.
  *
- *@doc Brightcove Player development overview https://player.support.brightcove.com/coding-topics/overview-player-api.html
+ *
+ * @doc Brightcove Player development overview https://player.support.brightcove.com/coding-topics/overview-player-api.html
  * @doc Brightcove Player API https://docs.brightcove.com/brightcove-player/current-release/Player.html
  * @doc HTML5 media events https://html.spec.whatwg.org/#mediaevents
  */
@@ -35,54 +36,34 @@ function handlePlaybackEvent_(event) {
     detail: eventDetail,
   };
 console.log("Player Start")
-  var customEvent = new CustomEvent(state, eventInit);
-  //console.log(eventDetail)
-  //window.parent.dispatchEvent(customEvent);
-  window.parent.postMessage(eventDetail,"https://www.ion.fiserv.com");
+  if (window.frameElement) {
+    // The player is in a Brightcove experience --> use CustomEvent
+    var customEvent = new CustomEvent(state, eventInit);
+    window.frameElement.dispatchEvent(customEvent);
+  } else {
+    // The player is embedded in the web page directly --> use postMessage
+    var message = {
+      state: state,
+      eventInit: eventInit,
+    };
+
+    // IMPORTANT!
+    // Replace '*' with the actual origin that should receive the message.
+    // E.g. 'https://www.mysite.com:80'.
+    var targetOrigin = 'https://ion.fiserv.com';
+
+    // Brightcove only allows string messages to be posted,
+    // so stringify the message object.
+    window.postMessage(JSON.stringify(message), targetOrigin);
+    // Handle the message in the parent window appropriately.
+  }
 }
 
-/**
- * Send milestone events.
- */
-
-
-
-function percentviewed(percNumGroup)
-{
-	var fcurrentTime = player.currentTime();
-	var fduration = player.duration();
-	var percentNum = Math.floor((fcurrentTime/fduration)*100);
-	console.log(fcurrentTime,' / ', fduration, ' - ',percentNum);
-	
-if (percNum>0 && percNum <25)
-    {
-      percNumGroup = 1
-    }
-    else if (percNum>=25 && percNum <50)
-    {
-      percNumGroup = 25
-    }
-    else if (percNum>=50 && percNum <75)
-    {
-      percNumGroup = 50
-    }
-    else if (percNum>75 && percNum <=95)
-    {
-      percNumGroup = 75
-    }
-    else if (percNum>95 && percNum <=100)
-    {
-      percNumGroup = 99
-    }
-    return (percNumGroup);
-  } 
 /**
  * @public
  * Send CustomEvents to the parent for specific media playback events.
  * @param {int} numTries Counter of tries to check that players are valid.
  */
-
- 
 function handleBrightcovePlayers(numTries) {
   var players = videojs.getPlayers();
   var playerIds = Object.keys(players);
@@ -99,13 +80,13 @@ function handleBrightcovePlayers(numTries) {
   } else {
     var playerId = playerIds[0];
     try {
-        videojs.getPlayer(playerId).ready(function() {
+      videojs.getPlayer(playerId).ready(function() {
         var player = this;
         var playerEvents = [
           'ended',
           'pause',
           'play',
-	        ];
+        ];
         playerEvents.forEach(function(playerEvent) {
           player.on(playerEvent, handlePlaybackEvent_);
         });
@@ -114,7 +95,6 @@ function handleBrightcovePlayers(numTries) {
       console.warn(e);
     }
   }
- 
 }
-console.log("**Start window.parent pm- brightcove test**")
+console.log("**Start window.parent pm- brightcove test1**")
 handleBrightcovePlayers(1);
