@@ -8,7 +8,6 @@
  *
  * But the script is run in the context of the parent window. So CustomEvents
  * can be dispatched and they can be received in the main window.
- *Forked from - https://gist.github.com/yuhui/3375b8221f6152600321bdf710dbe90b
  *
  *@doc Brightcove Player development overview https://player.support.brightcove.com/coding-topics/overview-player-api.html
  * @doc Brightcove Player API https://docs.brightcove.com/brightcove-player/current-release/Player.html
@@ -32,14 +31,31 @@ function handlePlaybackEvent_(event) {
     name: player.mediainfo.name,
     state: state,
   };
+  
+  if (event === 'timeupdate') {
+	var fcurrentTime = player.currentTime();
+	var fduration = player.duration();
+	var fpercentViewed = Math.floor((fcurrentTime/fduration)*100);
+	if (fpercentViewed >= 25) {
+    eventDetail.milestone = '25';
+		console.log("test 25")// or whatever you want to label your milestone
+  }
+  
   var eventInit = {
     detail: eventDetail,
   };
-console.log("Player Start")
-  var customEvent = new CustomEvent(state, eventInit);
-  //console.log(eventDetail)
-  //window.parent.dispatchEvent(customEvent);
-  window.parent.postMessage(eventDetail,"*");
+    
+	console.log("Player Start")
+	
+	var ev = player._isEventViewed;	
+	
+	if (!player._isEventViewed.play && state=="play")
+		{
+		  player._isEventViewed.play=true;
+		  window.parent.postMessage(eventDetail,"*");
+		  console.log("***play***")
+		}	
+
 }
 
 /**
@@ -71,8 +87,11 @@ function handleBrightcovePlayers(numTries) {
 		  'timeupdate',
         ];
         playerEvents.forEach(function(playerEvent) {
-          player.on(playerEvent, handlePlaybackEvent_);
-        });
+			if (playerEvent =='timeupdate')
+{
+  player.on(playerEvent, handlePlaybackEvent_);
+}
+         );
       });
     } catch (e) {
       console.warn(e);
@@ -80,5 +99,5 @@ function handleBrightcovePlayers(numTries) {
   }
 }
 
-console.log("***Start window.parent pm- tu added**")
+console.log("***Start window.parent pm-tu_Play**");
 handleBrightcovePlayers(1);
